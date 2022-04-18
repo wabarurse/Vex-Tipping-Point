@@ -8,7 +8,11 @@ using namespace pros;
 float controllerAnalogLeftY;
 float controllerAnalogRightY;
 
-//intake
+// drivetrain
+bool upButtonState = false;
+int drivetrainState = 0;
+
+// intake
 bool AButtonState = false;
 bool XButtonState = false;
 int intakeState = 0;
@@ -21,23 +25,50 @@ int frontPistonState = 0;
 bool R2ButtonState = false;
 int backPistonState = 0;
 
-
-
+// auton sheild
+bool leftButtonState = false; 
+int autonSheildState = 0;
 void drive_control_fn(void* param){
   while (true) {
-
-    controllerAnalogLeftY = master.get_analog(ANALOG_LEFT_Y);
-    controllerAnalogRightY = master.get_analog(ANALOG_RIGHT_Y);
-
-    if (fabs(controllerAnalogLeftY) > 10 || fabs(controllerAnalogRightY) > 10) {
-      left_front_motor.move(controllerAnalogLeftY);
-      left_mid_motor.move(controllerAnalogLeftY);
-      left_back_motor.move(controllerAnalogLeftY);
-      right_front_motor.move(controllerAnalogRightY);
-      right_mid_motor.move(controllerAnalogRightY);
-      right_back_motor.move(controllerAnalogRightY);
+  
+    if(master.get_digital(DIGITAL_UP)){
+      if(upButtonState == false && drivetrainState == 0){
+        upButtonState = true;
+        drivetrainState = 1;
+        left_front_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+        left_back_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+        left_mid_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+        right_front_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+        right_back_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+        right_mid_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+      }
+      else if(upButtonState == false && drivetrainState == 1){
+        upButtonState = true;
+        drivetrainState = 0;
+        left_front_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+        left_back_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+        left_mid_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+        right_front_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+        right_back_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+        right_mid_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+      }
     }
-    else {
+    else{
+      upButtonState = false;
+
+    }
+
+    if (fabs(master.get_analog(ANALOG_LEFT_Y)) > 10 || fabs(master.get_analog(ANALOG_RIGHT_Y)) > 10) {
+      left_front_motor.move(master.get_analog(ANALOG_LEFT_Y));
+      left_mid_motor.move(master.get_analog(ANALOG_LEFT_Y));
+      left_back_motor.move(master.get_analog(ANALOG_LEFT_Y));
+      right_front_motor.move(master.get_analog(ANALOG_RIGHT_Y));
+      right_mid_motor.move(master.get_analog(ANALOG_RIGHT_Y));
+      right_back_motor.move(master.get_analog(ANALOG_RIGHT_Y));
+    
+    }
+    else{
+
       left_front_motor.move(0);
       left_mid_motor.move(0);
       left_back_motor.move(0);
@@ -146,7 +177,30 @@ void back_piston_fn(void* param){
     delay(10);
   }
 }
+/*
+void auton_sheild_fn(void* param){
+  while (true){
+       if(master.get_digital(DIGITAL_LEFT) == 1){
+      if(leftButtonState == false && autonSheildState == 0){
+        leftButtonState = true;
+        autonSheildState = 1;
+        autonPiston.set_value(true);
+      }
+      if(leftButtonState == false && autonSHeildState == 1){
+        leftButtonState = true;
+        autonSheildState = 0;
+        autonPiston.set_value(false);
+      }
+    } else {
+      leftButtonState = false;
+    }
+    delay(10);
+  
 
+
+  }
+}
+*/
 void opcontrol() {
 
 
