@@ -48,7 +48,7 @@ void display_vision_error(int line, std::string msg)
 
 void initialize()
 {
-	arm_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+	arm_motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 	intake_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
 	left_front_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
 	left_back_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);

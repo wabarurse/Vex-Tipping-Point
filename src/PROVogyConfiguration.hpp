@@ -42,18 +42,19 @@ using namespace pros;
 
 #define INERTIAL_SENSOR_PORT 5
 
-#define FRONT_VISION_PORT 3
+#define FRONT_VISION_PORT 4
 #define BACK_VISION_PORT 1
 
 #define EXT_EXPANDER_PORT 3
 
 #define Y_ENCODER_TOP_PORT 'H'
-#define Y_ENCODER_BOTTOM_PORT 'E'
+#define Y_ENCODER_BOTTOM_PORT 'G'
+
 
 #define PNEUMATIC_BACK_PORT 'A'
 #define PNEUMATIC_FRONT_PORT 'B'
 #define PNEUMATIC_TOP_PORT 'C'
-#define TOUCH_SENSOR_PORT 'D'
+#define TOUCH_SENSOR_PORT 'F'
 
 #define MOVE_FORWARD 1
 #define MOVE_BACKWARD -1
