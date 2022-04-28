@@ -86,10 +86,10 @@ void arm_control_fn(void* param){
   while (true) {
 
     if (master.get_digital(DIGITAL_L1)){
-      arm_motor.move(-127);
+      arm_motor.move(127);
     }
     else if (master.get_digital(DIGITAL_L2)) {
-      arm_motor.move(127);
+      arm_motor.move(-127);
     }
     else if (!master.get_digital(DIGITAL_L1) && !master.get_digital(DIGITAL_L2)) {
       arm_motor.move(0);
@@ -140,7 +140,7 @@ void intake_control_fn(void* param) {
 
 void front_piston_fn(void* param){
   while (true){
-    if(master.get_digital(DIGITAL_R2) == 1){
+    if(master.get_digital(DIGITAL_R1) == 1){
       if(R1ButtonState == false && frontPistonState == 0){
         R1ButtonState = true;
         frontPistonState = 1;
@@ -160,7 +160,7 @@ void front_piston_fn(void* param){
 
 void back_piston_fn(void* param){
   while (true){
-    if(master.get_digital(DIGITAL_R1) == 1){
+    if(master.get_digital(DIGITAL_R2) == 1){
       if(R2ButtonState == false && backPistonState == 0){
         R2ButtonState = true;
         backPistonState = 1;

@@ -1,13 +1,12 @@
-#include "../include/main.h"
+#include "main.h"
 #include "PROVogyMathLib.hpp"
 
 /****************************************************************************************************************
- * 2022 Game field coodinate system setting:
- *****************************************************************************************************************/
-
+* 2022 Game field coodinate system setting:
+*****************************************************************************************************************/
 using namespace pros;
 
-#define WHEEL_CIRCUMFERENCE_CM 21.944
+#define WHEEL_CIRCUMFERENCE_CM 31.918
 #define ENCODER_CIRCUMFERENCE_CM 21.944
 
 #define ENCODER_X_FROM_CENTRE 2.5
@@ -16,9 +15,13 @@ using namespace pros;
 // ENSURE THAT Y DIFFERENCE IS THE VERTICAL AND X DIFFERENCE IS THE HORIZONTAL IN THIS ORIENTATION
 // make either negative according to cartesian coordinates
 
+#define DEBUG_DISPLAY_MASSAGE_OFF 0
+#define DEBUG_DISPLAY_MASSAGE_ON 1
+
 // coordinates of centre of robot
 #define ROBOT_INITIAL_X 73.5
 #define ROBOT_INITIAL_Y 28.5
+
 
 #define ROBOT_INITIAL_HEADING 90
 
@@ -42,20 +45,19 @@ using namespace pros;
 
 #define INERTIAL_SENSOR_PORT 5
 
-#define FRONT_VISION_PORT 4
-#define BACK_VISION_PORT 1
-
-#define EXT_EXPANDER_PORT 3
+#define FRONT_VISION_PORT 1
+#define BACK_VISION_PORT 4
 
 #define Y_ENCODER_TOP_PORT 'H'
 #define Y_ENCODER_BOTTOM_PORT 'G'
 
+#define PNEUMATIC_BACK_PORT 'B'
+#define PNEUMATIC_FRONT_PORT 'A'
 
-#define PNEUMATIC_BACK_PORT 'A'
-#define PNEUMATIC_FRONT_PORT 'B'
-#define PNEUMATIC_TOP_PORT 'C'
+#define PNEUMATIC_W_PORT 'C'
 #define TOUCH_SENSOR_PORT 'F'
 
+///////////////////////////////////////////
 #define MOVE_FORWARD 1
 #define MOVE_BACKWARD -1
 #define MOVE_RIGHT 1
@@ -79,109 +81,19 @@ using namespace pros;
 #define DETECT_BLUE_GOAL_SIG 2
 #define DETECT_YELLOW_GOAL_SIG 3
 
-// the following defines are copied from XBotAutonomous_lib.hpp so that the hpp files can be combined
-#define STOP_AT_END true
-#define ROTATE_AT_END false
+//#define ARM_NOT_HOLDING_POSITION 0
+#define ARM_HOLDING_POSITION 1
+#define ARM_NOT_HOLDING_POSITION 2
+
 
 /*********************************************************
- * background command
- *********************************************************/
-#define AUTON_15_CMD_IDLE 0
-#define AUTON_15_CMD_PREPARE_ONE_RED_BALL 1
-#define AUTON_15_CMD_PREPARE_ONE_BLUE_BALL 2
+* ARM related definitions
+/*********************************************************/
 
-/********************************************************
- * Fly Wheel related definitions
- *********************************************************/
-#define CMD_CLAW_STOP_ACTION 0
-#define CMD_CLAW_ONE_ACTION 1
-#define CMD_CLAW_TWO_ACTIONS 2
-#define CMD_CLAW_TRI_ACTIONS 3
-
-// claw states
-#define CLAW_CATCH -410
-#define CLAW_PRE -280
-#define CLAW_RELEASE -190
-
-#define CLAW_ACTION_NONE 100
-#define CLAW_ACTION_BY_DELAY 101
-#define CLAW_ACTION_BY_ENCODER 102
-
-#define CLAW_ROTATE_NONE 200
-#define CLAW_ROTATE_UP 201
-#define CLAW_ROTATE_DOWN 202
-
-/*********************************************************
- * HOOK related definitions
- *********************************************************/
-#define CMD_HOOK_STOP_ACTION 10
-#define CMD_HOOK_ONE_ACTION 11
-#define CMD_HOOK_TWO_ACTIONS 12
-#define CMD_HOOK_TRI_ACTIONS 13\
-// hook state definitions
-#define HOOK_CATCH 195
-#define HOOK_PRE 120
-#define HOOK_RELEASE 0
-
-#define HOOK_ACTION_NONE 110
-#define HOOK_ACTION_BY_DELAY 111
-#define HOOK_ACTION_BY_ENCODER 112
-
-#define HOOK_ROTATE_NONE 210
-#define HOOK_ROTATE_UP 211
-#define HOOK_ROTATE_DOWN 212
-
-/*********************************************************
- * ARM related definitions
- *********************************************************/
-
-#define PRESS_BRIDGE -380
-#define RELEASE_BRIDGE -740
-#define MAX_TOP -1000
-#define CARRY_GOAL -250
-
-/*********************************************************
- * Intake related definitions
- *********************************************************/
-#define CMD_INTAKE_STOP_ACTION 20
-#define CMD_INTAKE_ONE_ACTION 21
-#define CMD_INTAKE_TWO_ACTIONS 22
-#define CMD_INTAKE_TRI_ACTIONS 23
-
-#define INTAKE_ACTION_NONE 120
-#define INTAKE_ACTION_BY_DELAY 121
-#define INTAKE_ACTION_BY_ENCODER 122
-
-#define INTAKE_ROTATE_NONE 220
-#define INTAKE_ROTATE_IN 221
-#define INTAKE_ROTATE_OUT 222
-
-/************************************************
-ARM related definitions
-************************************************/
-#define CMD_ARM_STOP_ACTION 20
-#define CMD_ARM_ONE_ACTION 21
-#define CMD_ARM_TWO_ACTIONS 22
-#define CMD_ARM_TRI_ACTIONS 23
-
-#define INTAKE_ARM_NONE 120
-#define INTAKE_ARM_BY_DELAY 121
-#define INTAKE_ARM_BY_ENCODER 122
-
-#define ARM_ROTATE_NONE 220
-#define ARM_ROTATE_IN 221
-#define ARM_ROTATE_OUT 222
-
-//**********************************************
-
-#define INTAKE_BALL_NONE_CMD 10
-#define INTAKE_RED_BALL_RESET 11
-#define INTAKE_BLUE_BALL_RESET 12
-
-#define WHEEL_CIRCUMFERENCE 21.9433775
-
-#define RED_HUE_BOUNDARY 30
-#define BLUE_HUE_BOUNDARY 160
+#define PRESS_BRIDGE 370 //380
+#define RELEASE_BRIDGE 550  //740
+#define MAX_TOP 1000
+#define CARRY_GOAL 250
 
 struct Hardware
 {
@@ -195,34 +107,18 @@ struct Hardware
     pros::Motor armMotorLib;
     pros::ADIDigitalOut frontPistonLib;
     pros::ADIDigitalOut backPistonLib;
-    pros::ADIDigitalOut topPistonLib;
     pros::Imu inertialSensorLib;
     pros::ADIEncoder Y_encoderLib;
 };
 
-typedef struct
-{
-    float leftFrontMotorPower;
-    float rightFrontMotorPower;
-    float leftBackMotorPower;
-    float rightBackMotorPower;
-} MotorController;
-
-typedef struct
-{
-    float Kp;
-    float Ki;
-    float Kd;
-} PID_config;
-
-//
+//intake
 typedef struct
 {
     bool hold_heading_lib;
     float holding_angle_lib;
 } HeadingStruct;
 
-// parallel movements structures
+//parallel movements structures
 
 typedef struct
 {
@@ -255,8 +151,26 @@ typedef struct
     int runTimes;
 } IntakeAction;
 
-extern int auto_15_start_selection;
-extern int function_selection;
+
+typedef struct {
+  // Object signature
+  int signature;
+  // left boundary coordinate of the object
+  int left_coord;
+  // top boundary coordinate of the object
+  int top_coord;
+  // width of the object
+  int width;
+  // height of the object
+  int height;
+  // coordinates of the middle of the object (computed from the values above)
+  int x_middle_coord;
+  int y_middle_coord;
+} detected_vision_goal_lib;
+
+
+extern int sys_display_info_terminal;
+
 // motor declarations //
 extern pros::Motor left_front_motor;
 extern pros::Motor right_front_motor;
@@ -268,27 +182,28 @@ extern pros::Motor intake_motor;
 extern pros::Motor arm_motor;
 extern pros::ADIDigitalOut back_piston;
 extern pros::ADIDigitalOut front_piston;
-extern pros::ADIDigitalOut top_piston;
+extern pros::ADIDigitalOut w_piston;
 
 extern pros::Imu inertial_sensor;
 extern pros::ADIPort touch_sensor;
+extern pros::ADIDigitalIn limit_switch;
 
 extern pros::ADIEncoder Y_encoder;
 
 extern pros::Controller master;
 
-// extern bool door_status;
+//extern bool door_status;
 
 // This variable defines the drifting angle during the period
 // after Inertial sensor reset in Initialization() and before the starting of auton.
 extern double sys_initial_to_auton_drifting;
 extern double sys_initial_robot_heading;
-extern double motion_initial_angle; // used by position tracing system,
-                                    // value changed in motion function.
+extern double motion_initial_angle;   //used by position tracing system,
+                                      //value changed in motion function.
 
 extern Hardware hardwareParameter;
 extern Point sys_coordinates;
-// extern Point sys_encoderPosition;
+//extern Point sys_encoderPosition;
 extern bool coordinateAccessAllowed;
 
 extern long flyWheelSet;
@@ -317,12 +232,17 @@ extern ArmAction armAction_3;
 extern int cmd_arm_run;
 extern bool checkpointBreak;
 
+extern int arm_action_lib;
+//extern double arm_hold_target_angle_lib;
+extern double arm_move_target_angle_lib;
+extern int arm_move_speed_lib;
+
 extern bool clawBreak;
 extern bool hookBreak;
 extern bool intakeBreak;
 extern bool armBreak;
 
-// auton tasks for multitasking
+//auton tasks for multitasking
 extern void hook_set_fn(void *param);
 extern void claw_set_fn(void *param);
 extern void intake_set_fn(void *param);
@@ -338,17 +258,17 @@ extern pros::Task hook_set;
 extern pros::Task claw_set;
 extern pros::Task arm_set;
 
+
 extern pros::Vision front_vision;
 extern pros::Vision back_vision;
-extern pros::vision_object_s_t closest_red_goal;
-extern pros::vision_object_s_t closest_blue_goal;
-extern pros::vision_object_s_t closest_yellow_goal;
 
 void waitForTouch();
 
 double convert_target_to_relative_angle_lib(double currentRelativeHeading, double targetHeading);
 
-void goStraightCmPID_lib(double cmDistance, double robotHeadingLib, int maxSpeed, int robotDirection, double headingKP, double headingKI, double headingKD, double distanceKP, double distanceKI, double distanceKD, long timeoutMili, int exitConditionExpectedPasses, Hardware robot);
+void goStraightCmPID_lib(double cmDistance, double robotHeadingLib, int maxSpeed, int robotDirection, double headingKP, 
+                        double headingKI, double headingKD, double distanceKP, double distanceKI, double distanceKD, 
+                        long timeoutMili, int exitConditionExpectedPasses, Hardware robot);
 
 void turnDegreesPID_lib(double targetHeadingLib, double turnType, long maxPower, int turnDirection, double headingKP, double headingKI, double headingKD, long timeoutMili, int exitConditionExpectedPasses, Hardware config);
 
@@ -358,9 +278,12 @@ void twoWheelTurnDegreesPID(double targetHeadingLib, double turnType, double sma
 double get_robot_heading_radians_lib(Hardware robot);
 double get_robot_heading_lib(Hardware robot);
 
+
 void update_coordinate(Point p);
 void update_Coodinate(int updateType, double pos);
 void update_coordinate(int updateType, double xPos, double yPos);
+
+
 
 Point get_coordinate();
 
@@ -369,30 +292,68 @@ void odometry_fn(void *param);
 void infoPrint_fn(void *param);
 
 void goStraightCm_Front_Vision(double cmDistance, double robotInertialHeadingLib, int maxSpeed,
-                               int goal_color_signature, Vision vision_sensor,
-                               double headingKP, double headingKI, double headingKD,
-                               double distanceKP, double distanceKI, double distanceKD,
-                               double visionKP, double visionKI, double visionKD,
-                               long timeoutMili, int exitConditionExpectedPasses, Hardware robot);
+                         int goal_color_signature, Vision vision_sensor,
+                         double headingKP, double headingKI, double headingKD,
+                         double distanceKP, double distanceKI, double distanceKD,
+                         double visionKP, double visionKI, double visionKD,
+                         long timeoutMili, int exitConditionExpectedPasses, Hardware robot);
 
 void goStraightCm_Back_Vision(double cmDistance, double robotInertialHeadingLib, int maxSpeed,
-                              int goal_color_signature, Vision vision_sensor,
-                              double headingKP, double headingKI, double headingKD,
-                              double distanceKP, double distanceKI, double distanceKD,
-                              double visionKP, double visionKI, double visionKD,
-                              long timeoutMili, int exitConditionExpectedPasses, Hardware robot);
+                         int goal_color_signature, Vision vision_sensor,
+                         double headingKP, double headingKI, double headingKD,
+                         double distanceKP, double distanceKI, double distanceKD,
+                         double visionKP, double visionKI, double visionKD,
+                         long timeoutMili, int exitConditionExpectedPasses, Hardware robot);
 
-void searchGoal_Vision(int maxSpeed, int searchDirection, double maxSearchintAngle,
-                       double goal_min_width, int goal_color_signature, pros::Vision vision_sensor,
-                       double visionKP, double visionKI, double visionKD,
-                       double inertialKP, double inertialKI, double inertialKD,
-                       long timeoutMili, int exitConditionExpectedPasses, Hardware robot);
+void search_Goal_Back_Vision(int maxSpeed, int searchDirection, double maxSearchintAngle,
+                      double goal_min_width, int goal_color_signature, pros::Vision vision_sensor,
+                      double visionKP, double visionKI, double visionKD,
+                      double inertialKP, double inertialKI, double inertialKD,
+                      long timeoutMili, int exitConditionExpectedPasses, Hardware robot);
 
 void display_vision_error(int line, std::string msg);
 
-/*
-vision::signature BLUE GOAL (1, -2383, -1413, -1898, 8113, 11627, 9870, 3.100, 0);
-vision::signature RED GOAL (2, 7761, 9095, 8428, -907, -503, -705, 4.400, 0);
-vision::signature YELLOW GOAL (3, 1783, 2259, 2021, -3573, -3215, -3394, 5.500, 0);
-vex::vision vision1 ( vex::PORT1, 29, BLUE GOAL, RED GOAL, YELLOW GOAL, SIG_4, SIG_5, SIG_6, SIG_7 );
-*/
+
+
+void new_goStraightCm_Front_Vision(double cmDistance, double robotInertialHeadingLib, int maxSpeed,
+                                   int goal_color_signature, Vision vision_sensor,
+                                   double headingKP, double headingKI, double headingKD,
+                                   double distanceKP, double distanceKI, double distanceKD,
+                                   double visionKP, double visionKI, double visionKD,
+                                   long timeoutMili, int exitConditionExpectedPasses, Hardware robot);
+
+
+double get_distance_back_vision(Vision vision_sensor, int goal_color_signature,
+	                              long samplingNumber, long sensingTimeInterval_Millis,
+															  int min_width, long timeoutMillis);
+                                
+double get_distance_front_vision(Vision vision_sensor, int goal_color_signature,
+	                              long samplingNumber, long sensingTimeInterval_Millis,
+															  int min_width, long timeoutMillis);
+
+
+void balance_bridge_PID_lib(int maxPower, double target_pitch, double balance_KP, double balance_KI, double balance_KD,
+                            long timeoutMili, int exitConditionExpectedPasses, Hardware robot);
+
+
+detected_vision_goal_lib get_goal_object_front_vision(int goal_color_signature);
+
+typedef struct
+{
+  double targetHeadingLib;
+  double turnType;
+  long maxPower;
+  int turnDirection;
+  double headingKP;
+  double headingKI;
+  double headingKD;
+  long timeoutMili;
+  int exitConditionExpectedPasses;
+} turnDegreesPID_cmd_struct;
+
+extern turnDegreesPID_cmd_struct turnDegreesPID_Parameter;
+
+void background_execution_turnDegreesPID_lib(void* param);
+//bool is_limit_switch_pressed();
+//void get_middle(int i);
+
