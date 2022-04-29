@@ -111,8 +111,6 @@ detected_vision_goal_lib get_goal_object_front_vision(int goal_color_signature) 
 	return final_goal;
 }
 
-
-
 void auton_60s_skills_bridge_version(){
 	sys_initial_to_auton_drifting = inertial_sensor.get_rotation();
 	sys_initial_robot_heading = 180;
@@ -541,8 +539,6 @@ int get_frontYellow_width()
 
 	return w;
 }
-
-
 
 void auton_60s_skills_slow_version(){
 	sys_initial_to_auton_drifting = inertial_sensor.get_rotation();
