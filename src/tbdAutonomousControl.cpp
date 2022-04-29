@@ -504,6 +504,44 @@ void red_middle_default()
 
 //RIGHT AUTONS
 
+void red_right_default_NEW()
+{
+
+	vision_object_s_t closest_goal;
+	sys_initial_robot_heading = 90;
+
+	clawAction_1 = {975, true, 1};
+	goStraightCmPID_lib(105, 90, 127, MOVE_FORWARD, 2, 0, 2, 0.75, 0, 5, 1000, 1, hardwareParameter);
+	goStraightCmPID_lib(55, 90, 127, MOVE_BACKWARD, 4, 0, 2, 1, 0, 0, 15000, 2, hardwareParameter);
+	turnDegreesPID_lib(180, ON_SPOT_TURN, 127, COUNTER_CLOCKWISE, 1.6, 0, 1, 1000, 3, hardwareParameter);
+	goStraightCm_Back_Vision(50, 180, 127, DETECT_RED_GOAL_SIG, back_vision,
+													 0.5, 0, 1, 0.3, 0, 5, 0.4, 0, 0, 1000, 1, hardwareParameter);
+	hookAction_1 = {0, true, 1};
+	goStraightCmPID_lib(25, 180, 100, MOVE_FORWARD, 2, 0, 2, 0.75, 0, 5, 700, 2, hardwareParameter);
+	clawAction_1 = {0, false, 1};
+	turnDegreesPID_lib(90, ON_SPOT_TURN, 127, CLOCKWISE, 1.6, 0, 1, 1000, 3, hardwareParameter);
+	intakeAction_1 = {127, 0, 0, 127, 1};
+	goStraightCmPID_lib(90, 90, 50, MOVE_FORWARD, 2, 0, 0, 1, 0, 0, 2000, 1, hardwareParameter);
+	turnDegreesPID_lib(180, ON_SPOT_TURN, 80, COUNTER_CLOCKWISE, 1.6, 0, 1, 1000, 3, hardwareParameter);
+	goStraightCmPID_lib(40, 180, 127, MOVE_FORWARD, 2, 0, 2, 0.75, 0, 5, 650, 1, hardwareParameter);
+
+	if (get_frontYellow_width() >= 60) {
+		
+		goStraightCm_Front_Vision(40, 180, 127, DETECT_YELLOW_GOAL_SIG, front_vision,
+								  0.5, 0, 1, 0.3, 0, 10, 0.3, 0, 5, 1500, 1, hardwareParameter);
+		currentInertia = get_robot_heading_lib(hardwareParameter);
+		armAction_1 = {127, 0, -50, 1};
+		goStraightCmPID_lib(20, currentInertia, 50, MOVE_FORWARD, 4, 0, 2, 0.75, 0, 5, 500, 2, hardwareParameter);
+		clawAction_1 = {100, true, 1};
+		delay(250);
+		armAction_1 = {127, 0, 200, 1};
+		turnDegreesPID_lib(110, ON_SPOT_TURN, 127, CLOCKWISE, 1.6, 0, 1, 1000, 1, hardwareParameter);
+		goStraightCmPID_lib(150, 110, 127, MOVE_BACKWARD, 4, 0, 2, 1, 0, 0, 1500, 1, hardwareParameter);
+		
+	}
+
+}
+
 void red_right_default()
 {
 
@@ -602,6 +640,8 @@ void red_two_goals()
 	//goStraightCmPID_lib(120, 180, 127, MOVE_BACKWARD, 4, 0, 2, 0.75, 0, 5, 1000, 2, hardwareParameter);
 	intakeAction_1 = {-25, 0, 5000, -25, 1};
 }
+
+//SKILLS AUTONS
 
 void auton_60s_skills_slow_version()
 {
@@ -992,10 +1032,8 @@ void auton_60s_skills_slow_version()
 Commemnt out ended here */
 
 	pros::lcd::print(2, "Time=%d", pros::millis() - start_time);
-w	aitForTouch();
+	waitForTouch();
 }
-
-//SKILLS AUTONS
 
 /**************************
 AUTON
@@ -1005,12 +1043,12 @@ void autonomous()
 	arm_motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
 	intake_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
 
-	left_front_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
-	left_back_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
-	left_mid_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
-	right_front_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
-	right_back_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
-	right_mid_motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+	left_front_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+	left_back_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+	left_mid_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+	right_front_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+	right_back_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+	right_mid_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
 
 	// left_front_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
 	// left_back_motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
@@ -1070,7 +1108,8 @@ CHOOSE RUN HERE
 	//blue_middle_default ();
 	//red_middle_default ();
 //right side code ---------------------------------------------------------------------------------------------------------------
-	red_right_default();
+	red_right_default_NEW();
+	//red_right_default();
 	//red_two_goals();
 
 	//encoder();
