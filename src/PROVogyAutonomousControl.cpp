@@ -312,7 +312,7 @@ void red_left_rings()
 
 //MIDDLE AUTONS
 
-void blue_middle_default()
+void blue_middle_default()v
 
 {
 	vision_object_s_t closest_goal;
@@ -422,6 +422,9 @@ void red_right_default()
 	sys_initial_robot_heading = 90;
 
 	goStraightCmPID_lib(105, 90, 127, MOVE_FORWARD, 2, 0, 2, 0.75, 0, 5, 2000, 1, hardwareParameter);
+	
+	waitForTouch();
+
 	clawAction_1 = {0, true, 1};
 	delay(300);
 	goStraightCmPID_lib(75, 90, 127, MOVE_BACKWARD, 4, 0, 2, 1, 0, 0, 15000, 2, hardwareParameter);
@@ -499,10 +502,10 @@ void red_two_goals()
 	
 	waitForTouch();
 	turnDegreesPID_lib(180, ON_SPOT_TURN, 127, COUNTER_CLOCKWISE, 1.6, 0, -1, 700, 3, hardwareParameter);
-	distance = get_distance_back_vision(back_vision, DETECT_RED_GOAL_SIG, 10, 10, 60, 110);
-	goStraightCm_Back_Vision(distance + 8, 135, 100, DETECT_RED_GOAL_SIG, back_vision,
+	//distance = get_distance_back_vision(back_vision, DETECT_RED_GOAL_SIG, 10, 10, 60, 110);
+	/*goStraightCm_Back_Vision(distance + 8, 135, 100, DETECT_RED_GOAL_SIG, back_vision,
 													 0.5, 0, 1, 0.5, 0, 5, 0.5, 0, 5, 1200, 1, hardwareParameter);
-	delay(100); 
+	*/delay(100); 
 	hookAction_1 = {0, true, 1};
 	//goStraightCmPID_lib(120, 180, 127, MOVE_BACKWARD, 4, 0, 2, 0.75, 0, 5, 1000, 2, hardwareParameter);
 	intakeAction_1 = {-25, 0, 5000, -25, 1};
