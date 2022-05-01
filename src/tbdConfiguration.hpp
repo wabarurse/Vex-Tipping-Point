@@ -55,6 +55,7 @@ using namespace pros;
 #define PNEUMATIC_FRONT_PORT 'A'
 
 #define PNEUMATIC_W_PORT 'C'
+#define LIMIT_SWITCH_PORT 'G'
 #define TOUCH_SENSOR_PORT 'H'
 
 ///////////////////////////////////////////
